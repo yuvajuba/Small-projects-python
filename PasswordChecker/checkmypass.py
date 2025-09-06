@@ -3,6 +3,25 @@ import sys
 import requests
 import hashlib
 
+generic_file = "passwords-to-check.txt"
+passwords = sys.argv[1:]
+
+if len(passwords) == 0:
+    if generic_file in os.listdir("./"):
+        with open(generic_file, "r") as f:
+            passwords = f.read().splitlines()
+        if len(passwords) == 0:
+            sys.exit(
+                f"{generic_file} is empty! please provide passwords to check")
+    else:
+        sys.exit(
+            f"Please provide passwords to check! either in '{generic_file}' file or inline")
+
+
+# The function prioritizes passwords passed in command line over those passed from the text file!
+# eg. use-cases:
+# $ python3 checkmypass.py Password1 Password2      => checks Password1 and Password2
+# $ python3 checkmypass.py                          => checks passwords from text file
 
 def request_api_data(query_char):
     url = "https://api.pwnedpasswords.com/range/" + query_char
@@ -27,21 +46,6 @@ def pwned_api_check(password):
     first5_char, tail = sha1password[:5], sha1password[5:]
     response = request_api_data(first5_char)
     return get_password_leaks_counts(response, tail)
-
-
-generic_file = "passwords-to-check.txt"
-passwords = sys.argv[1:]
-
-if len(passwords) == 0:
-    if generic_file in os.listdir("./"):
-        with open(generic_file, "r") as f:
-            passwords = f.read().splitlines()
-        if len(passwords) == 0:
-            sys.exit(
-                f"{generic_file} is empty! please provide passwords to check")
-    else:
-        sys.exit(
-            f"Please provide passwords to check! either in '{generic_file}' file or inline")
 
 
 def main(args):
